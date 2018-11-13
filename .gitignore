@@ -1,3 +1,9 @@
 *soft.gz
+
 .idea
 
+
+.Rproj.user
+*.RData
+*.Rhistory
+PublicDataSetSearch
