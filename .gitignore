@@ -10,3 +10,15 @@ PublicDataSetSearch
 *.pptx
 
 DraftModel1.xml
+__pycache__
+
+*.out
+*PEData*.txt
+
+*.cps
+
+*.sbml
+
+Fit*
+
+MultipleParameterEstimation
