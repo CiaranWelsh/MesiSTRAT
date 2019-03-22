@@ -28,3 +28,5 @@ MultipleParameterEstimation
 
 *.zip
 
+CrossTalkModel/ModelSelectionProblems/Problem*
+
