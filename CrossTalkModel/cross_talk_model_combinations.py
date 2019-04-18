@@ -884,17 +884,17 @@ class CrossTalkModel:
             '_kMekPhosByAkt_kcat',
             'kRafDephosByAkt_km',
             '_kRafDephosByAkt_kcat',
-            'kSmad2PhosByAkt_km',
+            '_kSmad2PhosByAkt_km',
             '_kSmad2PhosByAkt_kcat',
             '_kSmad2PhosByAkt_kcat',
-            'kSmad2PhosByAkt_km',
-            'kSmad2PhosByAkt_km',
+            '_kSmad2PhosByAkt_km',
+            '_kSmad2PhosByAkt_km',
             '_kSmad2PhosByAkt_ki',
-            'kSmad2PhosByErk_km',
+            '_kSmad2PhosByErk_km',
             '_kSmad2PhosByErk_kcat',
             '_kSmad2PhosByErk_kcat',
-            'kSmad2PhosByErk_km',
-            'kSmad2PhosByErk_km',
+            '_kSmad2PhosByErk_km',
+            '_kSmad2PhosByErk_km',
             '_kSmad2PhosByErk_ki',
         ]
 
@@ -997,10 +997,10 @@ class CrossTalkModel:
 		_kRafDephosByAkt_kcat = 9998.43;
 		_kPI3KPhosByTGFbR_kcat = 1233.66;
                 
-        kSmad2PhosByAkt_km = 50;
+        _kSmad2PhosByAkt_km = 50;
         kSmad2DephosByErk_km = 50;
-        kSmad2PhosByAkt_km = 50;
-        kSmad2PhosByErk_km = 50;
+        _kSmad2PhosByAkt_km = 50;
+        _kSmad2PhosByErk_km = 50;
         kSmad2DephosByErk_km = 50;
         kSmad2DehosByAkt_km = 50;
         kSmad2DephosByAkt_km = 50;
@@ -1207,14 +1207,17 @@ class CrossTalkModel:
         :return:
         """
         return """
-        //CrossTalkR11  :    Smad2     => pSmad2    ;   Cell *  MMWithKcat(kSmad2PhosByAkt_km, _kSmad2PhosByAkt_kcat, Smad2, pAkt)       ;
-        CrossTalkR11  :    Smad2     => pSmad2    ;   Cell *  _kSmad2PhosByAkt_kcat*pAkt*Smad2 / (kSmad2PhosByAkt_km + Smad2 + (kSmad2PhosByAkt_km*ppErk / _kSmad2PhosByAkt_ki))       ;
+        CrossTalkR11  :    Smad2     => pSmad2    ;   Cell *  _kSmad2PhosByAkt_kcat*pAkt*Smad2 / (    _kSmad2PhosByAkt_km  +  (Smad2 * (ppErk / _kSmad2PhosByAkt_ki))   );
+        
+        //(  _kSmad2PhosByAkt_km +  (  Smad2 * (1 + (ppErk / _kSmad2PhosByAkt_ki))  )  );
+        
         """
 
     def erk_activates_smad2(self):
         return """
-        // CrossTalkR12  :    Smad2     => pSmad2    ;   Cell *  MMWithKcat(kSmad2PhosByErk_km, _kSmad2PhosByErk_kcat, Smad2, ppErk)       ;
-        CrossTalkR12  :    Smad2     => pSmad2    ;   Cell *  _kSmad2PhosByErk_kcat*ppErk*Smad2 / (kSmad2PhosByErk_km + Smad2 + (kSmad2PhosByErk_km*pAkt / _kSmad2PhosByErk_ki))       ;
+        CrossTalkR12  :    Smad2     => pSmad2    ;   Cell *  _kSmad2PhosByErk_kcat*ppErk*Smad2 / ( _kSmad2PhosByErk_km + ( Smad2 * (pAkt / _kSmad2PhosByErk_ki) )     );
+        
+        //( _kSmad2PhosByErk_km + (Smad2 * ( 1 + (pAkt / _kSmad2PhosByErk_ki) )  ) );
         """
 
     def _events(self):
@@ -1542,7 +1545,7 @@ class CrossTalkModel:
 
 if __name__ == '__main__':
     WORKING_DIRECTORY = r'/home/ncw135/Documents/MesiSTRAT'
-    for i in range(40, 46):
+    for i in range(48, 49):
 
         PROBLEM = i
         ## Which model is the current focus of analysis
@@ -1550,13 +1553,13 @@ if __name__ == '__main__':
 
         FIT = '1'
 
-        CLUSTER = False
+        CLUSTER = 'slurm'
 
         ## True, False, 'slurm' or 'sge'. Passed onto parameter estimation class
-        RUN_MODE = False
+        RUN_MODE = 'slurm'
 
         ## Configure and run the parameter estimations
-        RUN_PARAMETER_ESTIMATION = False
+        RUN_PARAMETER_ESTIMATION = True
 
         RUN_PARAMETER_ESTIMATION_FROM_BEST_PARAMETERS = False
 
@@ -1604,7 +1607,7 @@ if __name__ == '__main__':
 
         PLOT_COMPETITIVE_INHIBITION_RATE_LAW = False
 
-        EXTRACT_GRAPHS = True
+        EXTRACT_GRAPHS = False
 
         ##===========================================================================================
 
