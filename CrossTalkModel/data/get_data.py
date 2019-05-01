@@ -44,9 +44,9 @@ class GetData:
 
     def get_data_from_sheet(self, sheet):
         sheet = self.workbook.sheet_by_name(sheet)
-        names = sheet.col_slice(0, 30, 41)
+        names = sheet.col_slice(0, 44, 55)
 
-        data = [sheet.col_slice(i, 30, 41) for i in self.col_indices]
+        data = [sheet.col_slice(i, 44, 55) for i in self.col_indices]
 
         df = pandas.DataFrame(data).transpose()
         df['condition'] = names
@@ -88,56 +88,8 @@ def do_stats(data):
     }
 
 
-def add_v3_to_v2_data(v2, v3):
-    """
-    I was given multiple verison of data file. Version 2 v2 was superseeded
-    by v3 but contains less data. This function starts with v2 then adds
-    any dataset that is present in v3 but not v2 or overwrites. This is necessary
-    as the data was cleaned in v2
-
-    :param v3: dataframe. version 3
-    :param v2: dataframe. version2 2
-    :return: cleaned df
-    """
-
-    v3 = v3.transpose()
-    v2 = v2.transpose()
-    for i in v3:
-        print('i', i)
-        v2[i] = v3[i]
-    return v2.transpose()
 
 
-def configure_for_mra(dataset):
-    which = ['D', 'T', 'E'] + [i for i in dataset.columns if '1.25' in i]
-    data = dataset[which].transpose()
-    data = data.drop(['TSC2', 'PRAS40-pS183'], axis=1)
-    data.columns = [i.split('-')[0] for i in data.columns]
-
-    new_names = {
-        '4E': '4EBP1',
-        '4EBP': '4EBP1',
-        'ERK': 'Erk',
-        'SMAD2': 'Smad2',
-        'mTOR': 'mTORC1',
-    }
-    data = data.rename(columns=new_names)
-
-    data.columns = ['DV:' + i for i in data.columns]
-    data['DA:ALL'] = 0
-
-    tr = ['TGFb', 'Everolimus', 'AZD', 'MK']
-    treatment_names = ['TGFb', 'mTORC1i', 'Meki', 'Akti']
-    treatment_names = ['TR:' + i for i in treatment_names]
-    treatments = {
-        'D': [0, 0, 0, 0],
-        'T': [1, 0, 0, 0],
-        'E': [1, 1, 0, 0],
-        'EM1.25': [1, 1, 1, 0],
-        'EA1.25': [1, 1, 0, 1],
-    }
-    tr_df = pandas.DataFrame(treatments, index=treatment_names).transpose()
-    return pandas.concat([tr_df, data], sort=False, axis=1)
 
 def combine_two_datasets(azd_file, mk_file):
     # azd_v2 = GetData(azd_data_file_v2).get_data()
@@ -241,44 +193,67 @@ if __name__ == '__main__':
 
     # print(ev_data)
 
-    # plot_barplot(ev_data, 'Norm to Everolimus Condition')
-    # plot_barplot(max_data, 'Norm to Condition with Max Value')
-    # plot_barplot(sum_data, 'Norm to Sum of All Conditions')
-    # plot_barplot(dmso_data, 'Norm to DMSO Condition')
-    # plot_barplot(av_data, 'Norm to Average of All Conditions')
+    plot_barplot(ev_data, 'Norm to Everolimus Condition')
+    plot_barplot(max_data, 'Norm to Condition with Max Value')
+    plot_barplot(sum_data, 'Norm to Sum of All Conditions')
+    plot_barplot(dmso_data, 'Norm to DMSO Condition')
+    plot_barplot(av_data, 'Norm to Average of All Conditions')
 
     #
-    mean = {}
-    se = {}
-    c = ['D', 'T', 'E', 'A72', 'M72', 'EA72', 'EM72']
-    for label, df in ev_data.groupby(level=0):
-        mean[label] = df.mean()
-        se[label] = df.sem()
-
-    order = ['Akt-pT308',  'SMAD2-pS465-467', 'ERK-pT202',  'S6K-pT389',  ]
-    mean = pandas.DataFrame(mean).loc[c]
-    se = pandas.DataFrame(se).loc[c]
-    mean = mean[order]
-    se = se[order]
-
-    print(mean)
-
+    # mean = {}
+    # se = {}
+    # c = ['D', 'T', 'E', 'A72', 'M72', 'EA72', 'EM72']
+    # for label, df in ev_data.groupby(level=0):
+    #     mean[label] = df.mean()
+    #     se[label] = df.sem()
     #
-    # mk_mean = pandas.DataFrame(mk_mean)
-    # mk_se = pandas.DataFrame(mk_se)
+    # order = ['Akt-pT308',  'SMAD2-pS465-467', 'ERK-pT202',  'S6K-pT389',  ]
+    # mean = pandas.DataFrame(mean).loc[c]
+    # se = pandas.DataFrame(se).loc[c]
+    # mean = mean[order]
+    # se = se[order]
     #
-    # print(azd_m)
-
-    dire = '/home/ncw135/Documents/MesiSTRAT/CrossTalkModel/data'
-    means_fname = os.path.join(dire, 'means.csv')
-    se_fname = os.path.join(dire, 'se.csv')
+    # print(mean)
+    #
+    # #
+    # # mk_mean = pandas.DataFrame(mk_mean)
+    # # mk_se = pandas.DataFrame(mk_se)
+    # #
+    # # print(azd_m)
+    #
+    # dire = '/home/ncw135/Documents/MesiSTRAT/CrossTalkModel/data'
+    # means_fname = os.path.join(dire, 'means.csv')
+    # se_fname = os.path.join(dire, 'se.csv')
 
 
 
     # print(data)
 
-    mean.to_csv(means_fname)
-    se.to_csv(se_fname)
+    # mean.to_csv(means_fname)
+    # se.to_csv(se_fname)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    '''
+    old stuff 
+    '''
+
+
+
     # mk_mean.to_csv(mk_means_fname)
     # mk_se.to_csv(mk_se_fname)
 

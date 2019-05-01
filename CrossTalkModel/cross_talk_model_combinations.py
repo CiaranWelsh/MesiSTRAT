@@ -1158,7 +1158,7 @@ class CrossTalkModel:
     def raf_phos_by_TGFbR(self):  # mek_phos_by_akt
         raise NotImplementedError
 
-    def pi3k_phos_by_TGFbR(self):
+    def pi3k_phos_by_TGFbR(self):fix me
         return "CrossTalkR2  :  PI3K =>  pPI3K  ; Cell * MMWithKcat(kPI3KPhosByTGFbR_km, _kPI3KPhosByTGFbR_kcat, PI3K, TGFbR_a) ;"
 
     def raf_phos_by_PI3K(self):
@@ -1208,13 +1208,14 @@ class CrossTalkModel:
         """
         return """
         //CrossTalkR11  :    Smad2     => pSmad2    ;   Cell *  MMWithKcat(_kSmad2PhosByAkt_km, _kSmad2PhosByAkt_kcat, Smad2, pAkt)       ;
-        CrossTalkR11  :    Smad2     => pSmad2    ;   Cell *  _kSmad2PhosByAkt_kcat*pAkt*Smad2 / (_kSmad2PhosByAkt_km + Smad2)  *  (1 + (ppErk / _kSmad2PhosByAkt_ki ));
+        CrossTalkR11  :    Smad2     => pSmad2    ;   Cell *  _kSmad2PhosByAkt_kcat*pAkt*Smad2 / (  (_kSmad2PhosByAkt_km + Smad2)  *  (1 + (ppErk / _kSmad2PhosByAkt_ki )) );
         """
 
     def erk_activates_smad2(self):
         return """
         // CrossTalkR12  :    Smad2     => pSmad2    ;   Cell *  MMWithKcat(_kSmad2PhosByErk_km, _kSmad2PhosByErk_kcat, Smad2, ppErk)       ;
-        CrossTalkR12  :    Smad2     => pSmad2    ;   Cell *  _kSmad2PhosByErk_kcat*ppErk*Smad2 / (_kSmad2PhosByErk_km + Smad2) *  (1 + (pAkt / _kSmad2PhosByErk_ki ))                   + (_kSmad2PhosByErk_km*pAkt / _kSmad2PhosByErk_ki))       ;
+        CrossTalkR12  :    Smad2     => pSmad2    ;   Cell *  _kSmad2PhosByErk_kcat*ppErk*Smad2 / (  (_kSmad2PhosByErk_km + Smad2) *  (1 + (pAkt / _kSmad2PhosByErk_ki ))   )    ;
+                    //+ (_kSmad2PhosByErk_km*pAkt / _kSmad2PhosByErk_ki))       ;
         """
 
     def _events(self):
@@ -1548,7 +1549,7 @@ if __name__ == '__main__':
     49: uncompetative
     48 - dud
     '''
-    for i in range(50, 51):
+    for i in range(50, 1):
 
         PROBLEM = i
         ## Which model is the current focus of analysis
@@ -1569,7 +1570,7 @@ if __name__ == '__main__':
         PLOT_CURRENT_SIMULATION_GRAPHS_WITH_COPASI_PARAMETERS = False
 
         ## iterate over all models and plot comparison between model and simulation
-        PLOT_ALL_SIMULATION_GRAPHS = False
+        PLOT_ALL_SIMULATION_GRAPHS = True
 
         ## plot performance matrix
         PLOT_PERFORMANCE_MATRIX = False
@@ -1610,7 +1611,7 @@ if __name__ == '__main__':
 
         PLOT_COMPETITIVE_INHIBITION_RATE_LAW = False
 
-        EXTRACT_GRAPHS = False
+        EXTRACT_GRAPHS = True
 
         ##===========================================================================================
 
