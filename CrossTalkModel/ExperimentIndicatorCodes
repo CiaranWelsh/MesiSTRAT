@@ -1,0 +1,16 @@
+- ExperimentIndicator 
+  - all conditions: SerumStarveRemoveTGFb
+  - all conditions: SerumStarveRemoveGrowthFactor
+  - > 0: add TGFb 
+  - 2: Add AZD at t=70.75h
+  - 3: Add AZD at t=48h
+  - 4: Add AZD at t=24h
+  - 5: Add AZD at t=0
+  - 6: Add MK at t=70.75h
+  - 7: Add MK at t=48h
+  - 8: Add MK at t=24h
+  - 9: Add MK at t=0
+  - 10: Add MK and AZD at t=48
+  - 11: Add MK and AZD at t=24
+  - 12: Add MK and AZD at t=0
+
