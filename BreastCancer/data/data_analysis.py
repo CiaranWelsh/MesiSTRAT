@@ -106,9 +106,10 @@ def plot(data, prefix, savefig=False):
 
         seaborn.lineplot(x='time', y=0, data=df.reset_index(),
                          hue='cell_line', style='cell_line',
-                         palette='bright', markers=True)
+                         palette='bright', markers=True, ci=95)
         seaborn.despine(fig, top=True, right=True)
         plt.ylabel('AU')
+        plt.title(label)
         fname = os.path.join(PLOTS_DIR, '{}_{}'.format(prefix, label))
         if savefig:
             plt.savefig(fname, dpi=200, bbox_inches='tight')
