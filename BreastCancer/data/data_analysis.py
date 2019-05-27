@@ -8,7 +8,29 @@ import seaborn
 WORKING_DIRECTORY = r'D:\MesiSTRAT\BreastCancer'
 DATA_DIRECTORY = os.path.join(WORKING_DIRECTORY, 'data')
 DATA_FILE = os.path.join(DATA_DIRECTORY, 'experimental_data.xlsx')
+SS_DATA_FILE = fname = os.path.join(DATA_DIRECTORY, 'ss_data.csv')
 PLOTS_DIR = os.path.join(DATA_DIRECTORY, 'plots')
+
+replacement_names = {
+    '4E_BP1': 'FourE_BP1_obs',
+    '4E_BP1pT37_46': 'FourE_BP1pT37_46_obs',
+    'Akt': 'Akt_obs',
+    'AktpS473': 'AktpS473_obs',
+    'AktpT308': 'AktpT308_obs',
+    'Coomassie staining': 'Coomassie _obs',
+    'ERK': 'ERK_obs',
+    'GAPDH': 'GAPDH_obs',
+    'IRS1': 'IRS1_obs',
+    'IRS1pS636_639': 'IRS1pS636_639_obs',
+    'PRAS40': 'PRAS40_obs',
+    'PRAS40pS183': 'PRAS40pS183_obs',
+    'PRAS40pT246': 'PRAS40pT246_obs',
+    'S6K': 'S6K_obs',
+    'S6KpT229': 'S6KpT229_obs',
+    'S6KpT389': 'S6KpT389_obs',
+    'TSC2': 'TSC2_obs',
+    'TSC2pT1462': 'TSC2pT1462_obs',
+}
 
 
 class GetData:
@@ -87,7 +109,6 @@ class GetData:
         df = data / data.mean()
         return df
 
-
     def get_data_normalised_to_coomassie_blue(self):
         # first normalise to average
         data = self.get_data_normed_to_average()
@@ -96,6 +117,50 @@ class GetData:
             df = data[ab]
             df_dct[ab] = df / data['Coomassie staining']
         return pandas.concat(df_dct, axis=1)
+
+    def to_copasi_format(self, fname, delimiter='\t'):
+        data = self.get_data_normalised_to_coomassie_blue()
+        data = data.stack()
+        data = data.loc['MCF7']
+        data['Insulin_indep'] = 1
+        data.index = data.index.swaplevel(0, 1)
+        data = data.sort_index(level='repeats')
+        old_names = ['4E_BP1', '4E_BP1pT37_46', 'Akt',
+                     'AktpS473', 'AktpT308',
+                     'Coomassie staining', 'ERK',
+                     'GAPDH', 'IRS1', 'IRS1pS636_639', 'PRAS40',
+                     'PRAS40pS183', 'PRAS40pT246', 'S6K',
+                     'S6KpT229', 'S6KpT389', 'TSC2',
+                     'TSC2pT1462', 'Insulin_indep']
+
+        data = data.rename(columns=replacement_names)
+        repeats = list(set(data.index.get_level_values(0)))
+        data = data.reset_index(level=1)
+
+        s = ''
+        for name in data.columns:
+            s += name + delimiter
+        s = s.strip()
+        s += '\n'
+        count = 0
+        for repeat in repeats:
+            count += 1
+            df = data.loc[repeat].values
+            for i in range(df.shape[0]):
+                for j in range(df.shape[1]):
+                    s += str(round(df[i, j], 6)) + delimiter
+                s = s.strip()
+                s += '\n'
+            s += '\n'
+            if count == len(repeats):
+                s = s.strip()
+
+        with open(fname, 'w') as f:
+            f.write(s)
+
+        print('Written copasi formatted data to "{}"'.format(fname))
+
+        return s
 
 
 def plot(data, prefix, savefig=False):
@@ -116,7 +181,6 @@ def plot(data, prefix, savefig=False):
 
 
 def principle_component_analysis(data, colourby='cell_line', savefig=False):
-
     data = data.stack()
     if colourby not in data.index.names:
         raise ValueError(f'colourby variable "{colourby}" not in "{data.index.names}"')
@@ -137,8 +201,8 @@ def principle_component_analysis(data, colourby='cell_line', savefig=False):
     seaborn.despine(fig=fig, top=True, right=True)
     plt.legend(loc='best')
     plt.title('PCA coloured by {}'.format(colourby))
-    plt.xlabel('PC1 {}%'.format(round(explained_variance[0], 2)*100))
-    plt.ylabel('PC2 {}%'.format(round(explained_variance[1], 2)*100))
+    plt.xlabel('PC1 {}%'.format(round(explained_variance[0], 2) * 100))
+    plt.ylabel('PC2 {}%'.format(round(explained_variance[1], 2) * 100))
     plt_dir = os.path.join(PLOTS_DIR, 'PCAPlots')
     if not os.path.isdir(plt_dir):
         os.makedirs(plt_dir)
@@ -147,7 +211,28 @@ def principle_component_analysis(data, colourby='cell_line', savefig=False):
         plt.savefig(fname, dpi=200, bbox_inches='tight')
 
 
+def get_initial_conc():
+    data = GetData(DATA_FILE).get_data_normalised_to_coomassie_blue()
+    data = data.stack()
+    average = data.groupby(level=['cell_line', 'time']).mean()
+    mcf70 = average.loc['MCF7', 0]
+    return pandas.DataFrame(mcf70).transpose()
+
+
+def ss_data_to_copasi_format():
+    data = get_initial_conc()
+    data = data.rename(columns=replacement_names)
+    data['Insulin_indep'] = 0.05
+    data.to_csv(SS_DATA_FILE, index=False, sep='\t')
+    return data
 
 
 if __name__ == '__main__':
     gd = GetData(DATA_FILE)
+
+
+
+'''
+
+Independent variables are not being mapped propertly, i.e. the Insulin
+'''

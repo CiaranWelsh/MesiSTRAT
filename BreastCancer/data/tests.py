@@ -81,6 +81,28 @@ class DataTests(unittest.TestCase):
         principle_component_analysis(data, colourby='time', savefig=True)
         principle_component_analysis(data, colourby='repeats', savefig=True)
 
+    def test_get_ic_data(self):
+        data = ss_data_to_copasi_format()
+        y = data.loc[('MCF7', 0), 'IRS1pS636_639_obs']
+        self.assertAlmostEqual(0.8613332330041832, y)
+
+    def test_to_copasi_format_isfile(self):
+        fname = os.path.join(DATA_DIRECTORY, 'copasi_formatted_data.csv')
+        self.gd.to_copasi_format(fname, '\t')
+        self.assertTrue(os.path.isfile(fname))
+
+    def test_to_copasi_format_num_columns(self):
+        fname = os.path.join(DATA_DIRECTORY, 'copasi_formatted_data.csv')
+        self.gd.to_copasi_format(fname, '\t')
+        with open(fname, 'r') as f:
+            data = f.read()
+        data = data.split('\n')
+        columns = data[0].split('\t')
+        expected = 20
+        actual = len(columns)
+        self.assertEqual(expected, actual)
+
+
 
 if __name__ == '__main__':
     unittest.main()
