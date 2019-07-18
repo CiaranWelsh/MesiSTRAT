@@ -236,7 +236,8 @@ if __name__ == '__main__':
     av_data = combine_two_datasets(azd_data_file_av, mk_data_file_av)
 
     # ev_data = ev_data[['D', 'T', 'E', 'A72', 'M72', 'EA72', 'EM72']]
-    # print(ev_data)
+    print(ev_data)
+    print(env_)
     # print(ev_data.loc['Akt-pT308'])
 
     # print(ev_data)

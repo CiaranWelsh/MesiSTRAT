@@ -374,14 +374,15 @@ class CrossTalkModel:
         df.sort_values('Condition', inplace=True)
 
         fig = plt.figure(figsize=(10, 5))
-        b = seaborn.barplot(data=df, x='Protein', y='Sim', hue='Condition', zorder=0)
+        b = seaborn.barplot(data=df, x='Protein', y='Sim', hue='Condition', zorder=0, palette=['black', 'grey', 'white'],
+                            edgecolor='black')
         plt.legend(loc=(1, 0.5))
         x_list = []
         for patch in b.patches:
             x_list.append(patch.get_xy()[0] + (patch._width / 2))
         #
         plt.errorbar(x_list, df['Exp'], yerr=df['Err'],
-                     marker='_', mec='blue', zorder=1, elinewidth=1, capsize=2, ecolor='blue',
+                     marker='_', mec='black', zorder=1, elinewidth=1, capsize=2, ecolor='black',
                      linestyle="None", markersize=10
                      )
         seaborn.despine(ax=b, top=True, right=True)
@@ -443,7 +444,7 @@ class CrossTalkModel:
             self.data_files,
             separator=[','] * len(self.data_files),
             weight_method=['value_scaling'] * len(self.data_files),
-            metabolites=[],
+            # metabolites=[],
             # metabolites=[i.name for i in mod.metabolites if i.name not in exclude],
             copy_number=self.copy_number,
             pe_number=1,
@@ -495,7 +496,7 @@ class CrossTalkModel:
             self.data_files,
             separator=[','] * len(self.data_files),
             weight_method=['value_scaling'] * len(self.data_files),
-            metabolites=[],
+            # metabolites=[],
             copy_number=self.copy_number,
             pe_number=1,
             global_quantities=free_params,
@@ -914,47 +915,42 @@ class CrossTalkModel:
 
     def _default_parameter_str(self):
         return """        
-        Akt = 45.000013943547444;
-		Erk = 80.0000247885287;
-		S6K = 45.000013943547444;
-		Smad2 = 45.000013943547444;
-		pAkt = 5.000001549283042;
-		pErk = 10.000003098566063;
-		pS6K = 5.000001549283042;
-		pSmad2 = 5.000001549283042;
-		Cell = 1.0;
-		AZD = 0.0;
-		Everolimus = 0.0;
-		ExperimentIndicator = 0.0;
-		GrowthFactors = 1.0;
-		MK2206 = 0.0;
-		TGFb = 0.005;
-		
-        kErkPhosByGF           = 0.1;
-        kAktPhosByGF           = 0.1;
-		_kSmad2PhosByTGFb      = 0.1;
-        _kSmad2Dephos          = 0.1;
-        _kErkPhosByTGFb_km     = 0.1;
-        _kErkPhosByTGFb_ki     = 0.1;
-        _kErkPhosByTGFb_kcat   = 0.1;
-        _kErkDephos            = 0.1;
-        _kAktPhosByTGFb_km     = 0.1;
-        _kAktPhosByTGFb_km     = 0.1;
-        _kAktPhosByTGFb_kcat   = 0.1;
-        _kAktDephos            = 0.1;
-        _kS6KPhosByAkt_km      = 0.1;
-        _kS6KPhosByAkt_ki      = 0.1;
-        _kS6KPhosByAkt_kcat    = 0.1;
-        _kS6KDephos            = 0.1;
-        _kAktPhosSmad2_km      = 0.1;
-        _kAktPhosSmad2_ki      = 0.1;
-        _kAktPhosSmad2_kcat    = 0.1;
-        _kErkPhosSmad2_km      = 0.1;
-        _kErkPhosSmad2_ki      = 0.1;
-        _kErkPhosSmad2_kcat    = 0.1;
-        _kAktActivateErk       = 0.1;
-        _kS6KActivateErk       = 0.1;
-		
+        
+        Akt = 2836.497890686395;
+        Erk = 4.720382773676701;
+        S6K = 1.5539786683703546e-05;
+        Smad2 = 574.6540897866457;
+        pAkt = 249.40506182880972;
+        pErk = 1.1875677016678898;
+        pS6K = 3.943771884555902;
+        pSmad2 = 0.0005925125167481985;
+        Cell = 1.0;
+        AZD = 0.0;
+        Everolimus = 0.0;
+        ExperimentIndicator = 0.0;
+        GrowthFactors = 1.0;
+        MK2206 = 0.0;
+        TGFb = 0.005;
+        _ErkActivateS6K = 0.5146853452098179;
+        _kAktActivateErk = 0.00779857827861191;
+        _kAktDephos = 2.817381812765289;
+        _kAktPhosByTGFb_kcat = 1.9321586563819613;
+        _kAktPhosByTGFb_km = 1e-06;
+        _kAktPhosSmad2_kcat = 250.09307129734577;
+        _kAktPhosSmad2_ki = 2.3711297696305094;
+        _kAktPhosSmad2_km = 159849.61877127536;
+        _kErkDephos = 0.8120002369435844;
+        _kErkPhosByTGFb_kcat = 7349.566965163551;
+        _kErkPhosByTGFb_ki = 999944.5901705284;
+        _kErkPhosByTGFb_km = 83900.71885922311;
+        _kS6KDephos = 1.6547141713211548;
+        _kS6KPhosByAkt_kcat = 2393.799210262596;
+        _kS6KPhosByAkt_ki = 1.000002108620802e-06;
+        _kS6KPhosByAkt_km = 181.24417678017062;
+        _kSmad2Dephos = 0.18123319271852234;
+        kAktPhosByGF = 0.1;
+        kErkPhosByGF = 0.1;
+
 		"""
 
     def extension_hypothesis_AktActivateSmad2ErkInhibit(self):
@@ -989,6 +985,14 @@ class CrossTalkModel:
         return HypothesisExtension(
             name='CrossTalkR3',
             reaction='Erk => pErk',
+            rate_law='_kAktActivateErk*Erk*Akt',
+            mode='additive',
+            to_repalce=None
+        )
+    def extension_hypothesis_pAktActivateErk(self):
+        return HypothesisExtension(
+            name='CrossTalkR4',
+            reaction='Erk => pErk',
             rate_law='_kAktActivateErk*Erk*pAkt',
             mode='additive',
             to_repalce=None
@@ -996,7 +1000,7 @@ class CrossTalkModel:
 
     def extension_hypothesis_S6KActivateErk(self):
         return HypothesisExtension(
-            name='CrossTalkR4',
+            name='CrossTalkR5',
             reaction='Erk => pErk',
             rate_law='_kS6KActivateErk*Erk*pS6K',
             mode='additive',
@@ -1004,7 +1008,7 @@ class CrossTalkModel:
         )
     def extension_hypothesis_ErkActivatesS6K(self):
         return HypothesisExtension(
-            name='CrossTalkR5',
+            name='CrossTalkR6',
             reaction='S6K => pS6K',
             rate_law='_ErkActivateS6K*pErk*S6K',
             mode='additive',
@@ -1100,12 +1104,13 @@ class CrossTalkModel:
         import sympy
         sym_mat = sympy.Matrix(df.values)
 
-    def get_parameters_from_copasi(self, mod):
+    def get_parameters_from_copasi(self):
         """
         get parameters from copasi model
         :param mod:
         :return:
         """
+        mod = self[CURRENT_MODEL_ID].to_copasi(best_parameters=False)
         dct = {i.name: i.initial_value for i in mod.global_quantities}
         metab = {i.name: i.concentration for i in mod.metabolites}
         vol = {i.name: i.initial_value for i in mod.compartments}
@@ -1292,11 +1297,14 @@ class CrossTalkModel:
 if __name__ == '__main__':
 
     # problem 62 is the model selection problem where we reduced the network
-    for i in range(68, 69):
+    for i in range(78, 79):
+
+        if i == 77:
+            raise ValueError('You must keep this simulation. ')
 
         PROBLEM = i
         ## Which model is the current focus of analysis
-        CURRENT_MODEL_ID = 10
+        CURRENT_MODEL_ID = 0
 
         FIT = '1'
 
@@ -1315,6 +1323,8 @@ if __name__ == '__main__':
         ## iterate over all models and plot comparison between model and simulation
         PLOT_ALL_SIMULATION_GRAPHS = False
 
+        PLOT_CURRENT_SIMULATION_GRAPHS = False
+
         ## plot performance matrix
         PLOT_PERFORMANCE_MATRIX = False
 
@@ -1331,10 +1341,11 @@ if __name__ == '__main__':
         PLOT_ALL_TIMESERIES_WITH_BEST_PARAMETERS = False
 
         ## extract best RSS per model and compute AICc
-        AICs = False
+        CALCULATE_MODEL_SELECTION_DATA = True
 
         ## Plot likelihood ranks plots
-        LIKELIHOOD_RANKS = True
+        LIKELIHOOD_RANKS = False
+
 
         ## get the best parameter set as a dict and antimony format from the model pointed to by CURRENT_MODEL_ID
         GET_BEST_PARAMETERS = False
@@ -1386,9 +1397,12 @@ if __name__ == '__main__':
             raise ValueError
 
         C = CrossTalkModel(PROBLEM_DIRECTORY, DATA_DIRECTORY, fit=FIT,
-                           mutually_exclusive_reactions=[('CrossTalkR1', 'CrossTalkR2')],
+                           mutually_exclusive_reactions=[
+                               ('CrossTalkR1', 'CrossTalkR2'),
+                               ('CrossTalkR3', 'CrossTalkR4')
+                           ],
                            method='particle_swarm',
-                           copy_number=100,
+                           copy_number=50,
                            run_mode=RUN_MODE,
                            iteration_limit=3000,
                            swarm_size=100,
@@ -1398,7 +1412,6 @@ if __name__ == '__main__':
                            lower_bound=0.000001,
                            upper_bound=1000000,
                            )
-        # print(C[0]._build_antimony())
 
         LOG.info(f'the size of your model selection problem is {len(C)}')
         LOG.info('num of estimated parameters={}'.format(C._get_number_estimated_model_parameters()))
@@ -1470,14 +1483,17 @@ if __name__ == '__main__':
         if PLOT_ALL_SIMULATION_GRAPHS:
             for model_id in range(len(C)):
                 LOG.info('plotting model {}'.format(model_id))
-                # try:
-                C[model_id].plot_bargraphs(best_parameters=True)
-                # except ValueError:
-                #     LOG.info("model '{}' skipped! No data to plot".format(model_id))
-                #     continue
-                # except RuntimeError:
-                #     LOG.info("model '{}' skipped! RunTimeError".format(model_id))
-                #     continue
+                try:
+                    C[model_id].plot_bargraphs(best_parameters=True)
+                except ValueError:
+                    LOG.info("model '{}' skipped! No data to plot".format(model_id))
+                    continue
+                except RuntimeError:
+                    LOG.info("model '{}' skipped! RunTimeError".format(model_id))
+                    continue
+
+        if PLOT_CURRENT_SIMULATION_GRAPHS:
+            C[CURRENT_MODEL_ID].plot_bargraphs(True)
 
         if PLOT_ALL_BARGRAPHS_WITH_BEST_PARAMETERS:
             LOG.info('fit dir: {}'.format(C[CURRENT_MODEL_ID].fit_dir))
@@ -1488,10 +1504,9 @@ if __name__ == '__main__':
             C[CURRENT_MODEL_ID].plot_bargraphs(best_parameters=False)
 
         # if PLOT_CURRENT_SIMULATION_GRAPHS_WITH_COPASI_PARAMETERS:
-        #     copasi_file = '/home/ncw135/Documents/MesiSTRAT/CrossTalkModel/ModelSelectionProblems/Problem3/ModelSelection/Topology77/Fit1/topology77_for_playing_with.cps'
-        #     mod = model.Model(copasi_file)
         #     # LOG.info(C[CURRENT_MODEL_ID].fit_dir)
-        #     dct, ant = C[CURRENT_MODEL_ID].get_parameters_from_copasi(mod)
+        #     dct, ant = C[CURRENT_MODEL_ID].get_parameters_from_copasi()
+        #     print()
         #     # LOG.info(ant)
         #     C[CURRENT_MODEL_ID].plot_bargraphs(best_parameters=ant)
 
@@ -1513,7 +1528,7 @@ if __name__ == '__main__':
             for model_id in C:
                 C[model_id].likelihood_ranks()
 
-        if AICs:
+        if CALCULATE_MODEL_SELECTION_DATA:
             df, fname = C.compute_all_aics(overwrite=True)
 
         if INSERT_BEST_PARAMETERS_INTO_ALL_COPASI_FILES:
