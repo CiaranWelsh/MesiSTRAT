@@ -20,7 +20,6 @@ logging.basicConfig(level=logging.INFO)
 LOG = logging.getLogger(__name__)
 
 
-
 class HypothesisExtension:
 
     def __init__(self, name, reaction, rate_law, mode='additive', to_repalce=None):
@@ -373,8 +372,125 @@ class CrossTalkModel:
         df['Condition'].cat.set_categories(order, inplace=True)
         df.sort_values('Condition', inplace=True)
 
+        proteins = df.Protein.unique()
+        for p in proteins:
+            plot_data = df[df['Protein'] == p]
+            print(plot_data)
+            fig, ax = plt.subplots()
+            index = numpy.arange(3)
+            index2 = numpy.array([0.25, 0.75, 1.25, 1.75, 2.25, 2.75])
+            bar_width = 0.35
+            rects1 = plt.bar(index, plot_data.Exp, bar_width, label='Exp', color='k', edgecolor='k', linewidth=3)
+            err = plt.errorbar(index, plot_data.Exp, yerr=plot_data.Err,
+                               linestyle="None", color='black', capsize=8)
+
+            rects2 = plt.bar(index + 0.05 + bar_width, plot_data.Sim, bar_width, label='Sim',
+                             color='white', edgecolor='k', linewidth=3)
+            colours = ['black', 'grey', 'white']
+            [rects1[i].set_facecolor(colours[i]) for i in range(len(rects1))]
+            [rects2[i].set_facecolor(colours[i]) for i in range(len(rects2))]
+            exp_sim = ['Exp', 'Sim'] * 3
+            labels = ['Control', r'TGF${\rm \beta}$', 'Everolimus']
+            # plt.xticks(index + bar_width/2, labels)
+            ax.get_xaxis().set_visible(False)
+            fs = 16
+            xlevel = 0.1
+            ax.annotate('Exp', xy=(0.2, xlevel), xycoords='figure fraction', fontsize=fs)
+            ax.annotate('Sim', xy=(0.31, xlevel), xycoords='figure fraction', fontsize=fs)
+            ax.annotate('Exp', xy=(0.47, xlevel), xycoords='figure fraction', fontsize=fs)
+            ax.annotate('Sim', xy=(0.58, xlevel), xycoords='figure fraction', fontsize=fs)
+            ax.annotate('Exp', xy=(0.73, xlevel), xycoords='figure fraction', fontsize=fs)
+            ax.annotate('Sim', xy=(0.84, xlevel), xycoords='figure fraction', fontsize=fs)
+
+            xlevel = 0.08
+
+            ax.annotate('', xy=(0.17, xlevel), xytext=(0.39, xlevel),
+                        xycoords='figure fraction',
+                        arrowprops=dict(arrowstyle='-', connectionstyle='arc3, rad=0',
+                                        color='black', linewidth=3)
+                        )
+            ax.annotate('', xy=(0.44, xlevel), xytext=(0.66, xlevel),
+                        xycoords='figure fraction',
+                        arrowprops=dict(arrowstyle='-', connectionstyle='arc3, rad=0',
+                                        color='black', linewidth=3)
+                        )
+            ax.annotate('', xy=(0.7, xlevel), xytext=(0.93, xlevel),
+                        xycoords='figure fraction',
+                        arrowprops=dict(arrowstyle='-', connectionstyle='arc3, rad=0',
+                                        color='black', linewidth=3)
+                        )
+
+            xlevel = 0.01
+
+            ax.annotate('Control', xy=(0.22, xlevel),
+                        xycoords='figure fraction',
+                        )
+            ax.annotate(r'TGF${\rm \beta}$', xy=(0.5, xlevel), xycoords='figure fraction',
+                        )
+            ax.annotate('Everolimus', xy=(0.72, xlevel),
+                        xycoords='figure fraction',
+                        )
+
+            ax.annotate('', xycoords='figure fraction', xy=(-0.02, 0))
+
+            plt.xlabel('')
+            plt.ylabel('AU')
+            seaborn.despine(fig=fig, top=True, right=True)
+
+            fname = os.path.join(self.graphs_dir, f'{p}_plot.png')
+            plt.savefig(fname, dpi=300, bbox_inches='tight')
+            LOG.info(f'saved image to "{fname}"')
+
+    def plot_bargraphs_old(self, best_parameters=False, selections=['pAkt', 'pS6K', 'pErk', 'pSmad2']):
+        """
+        Plot simulation vs experimental datagraphs
+
+        Args:
+            best_parameters:
+            selections:
+
+        Returns:
+
+        """
+        marker = '_'
+        markersize = 10
+        import matplotlib
+        matplotlib.use('Qt5Agg')
+        seaborn.set_style('white')
+        seaborn.set_context(context='talk')
+        sim_data = self.simulate_conditions(best_parameters=best_parameters)
+        sim_data = sim_data.reset_index(level=1)
+        sim_data = sim_data.rename(columns={'level_1': 'Time'})
+        sim_data = sim_data[sim_data['Time'] == 72]
+        del sim_data['Time']
+        sim_data.index = [i.replace('72', '') for i in sim_data.index]
+
+        err_data = self.get_errors()
+        err_data.index = [i.replace('72', '') for i in err_data.index]
+        err_data = pandas.DataFrame(err_data.loc[list(sim_data.index)])
+
+        exp_data = self.get_experimental_data()[selections]
+        exp_data.index = [i.replace('72', '') for i in exp_data.index]
+        sim_data = pandas.DataFrame(sim_data.stack())
+        exp_data = pandas.DataFrame(exp_data.stack())
+        err_data = pandas.DataFrame(err_data.stack())
+        sim_data.columns = ['Sim']
+        exp_data.columns = ['Exp']
+        err_data.columns = ['Err']
+        df = pandas.concat([exp_data, err_data, sim_data], axis=1)
+
+        df = df.reset_index()
+        df.columns = ['Condition', 'Protein', 'Exp', 'Err', 'Sim']
+        order = ['D', 'T', 'A', 'M', 'E', 'EA', 'EM']
+        conds = list(set(df['Condition']))
+        order = [i for i in order if i in conds]
+        df['Condition'] = df['Condition'].astype('category')
+        df['Condition'].cat.set_categories(order, inplace=True)
+        df.sort_values('Condition', inplace=True)
+
         fig = plt.figure(figsize=(10, 5))
-        b = seaborn.barplot(data=df, x='Protein', y='Sim', hue='Condition', zorder=0, palette=['black', 'grey', 'white'],
+        b = seaborn.barplot(data=df, x='Protein', y='Sim', hue='Condition', zorder=0,
+                            palette=['black', 'grey', 'white'],
                             edgecolor='black')
         plt.legend(loc=(1, 0.5))
         x_list = []
@@ -989,6 +1105,7 @@ class CrossTalkModel:
             mode='additive',
             to_repalce=None
         )
+
     def extension_hypothesis_pAktActivateErk(self):
         return HypothesisExtension(
             name='CrossTalkR4',
@@ -1006,6 +1123,7 @@ class CrossTalkModel:
             mode='additive',
             to_repalce=None
         )
+
     def extension_hypothesis_ErkActivatesS6K(self):
         return HypothesisExtension(
             name='CrossTalkR6',
@@ -1171,7 +1289,6 @@ class CrossTalkModel:
         df.to_csv(fname)
         LOG.info('filtered correlations now in "{}"'.format(fname))
 
-
     def plot_timecourse(self, selection=['pAkt', 'pErk', 'pS6K', 'pSmad2']):
         """
 
@@ -1297,14 +1414,14 @@ class CrossTalkModel:
 if __name__ == '__main__':
 
     # problem 62 is the model selection problem where we reduced the network
-    for i in range(78, 79):
+    for i in range(77, 78):
 
-        if i == 77:
-            raise ValueError('You must keep this simulation. ')
+        # if i == 77:
+        #     raise ValueError('You must keep this simulation. ')
 
         PROBLEM = i
         ## Which model is the current focus of analysis
-        CURRENT_MODEL_ID = 0
+        CURRENT_MODEL_ID = 1
 
         FIT = '1'
 
@@ -1323,7 +1440,7 @@ if __name__ == '__main__':
         ## iterate over all models and plot comparison between model and simulation
         PLOT_ALL_SIMULATION_GRAPHS = False
 
-        PLOT_CURRENT_SIMULATION_GRAPHS = False
+        PLOT_CURRENT_SIMULATION_GRAPHS = True
 
         ## plot performance matrix
         PLOT_PERFORMANCE_MATRIX = False
@@ -1341,11 +1458,10 @@ if __name__ == '__main__':
         PLOT_ALL_TIMESERIES_WITH_BEST_PARAMETERS = False
 
         ## extract best RSS per model and compute AICc
-        CALCULATE_MODEL_SELECTION_DATA = True
+        CALCULATE_MODEL_SELECTION_DATA = False
 
         ## Plot likelihood ranks plots
         LIKELIHOOD_RANKS = False
-
 
         ## get the best parameter set as a dict and antimony format from the model pointed to by CURRENT_MODEL_ID
         GET_BEST_PARAMETERS = False
@@ -1369,7 +1485,6 @@ if __name__ == '__main__':
 
         ## analyse correlations
         ANALYSE_CORRELATIONS = False
-
 
         PLOT_COMPETITIVE_INHIBITION_RATE_LAW = False
 
@@ -1466,7 +1581,6 @@ if __name__ == '__main__':
             pe = C[CURRENT_MODEL_ID]._configure_PE_for_viz()
             pe.model.open()
 
-
         if RUN_PARAMETER_ESTIMATION:
             for model_id in C:
                 C[model_id].run_parameter_estimation()
@@ -1481,6 +1595,7 @@ if __name__ == '__main__':
                 # PE.model.open()
 
         if PLOT_ALL_SIMULATION_GRAPHS:
+            print('len C is', len(C))
             for model_id in range(len(C)):
                 LOG.info('plotting model {}'.format(model_id))
                 try:
